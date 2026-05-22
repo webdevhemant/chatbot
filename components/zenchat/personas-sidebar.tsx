@@ -6,12 +6,20 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { MessageCircle, PenSquare, Sparkles, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
+interface LiveConversation {
+  id: string;
+  personaId: string;
+  title: string;
+  updatedAt: Date;
+}
+
 interface PersonasSidebarProps {
   activePersonaId: string;
   onPersonaSelect: (persona: Persona) => void;
   onConversationSelect: (conversationId: string, personaId: string) => void;
   activeConversationId?: string;
   onNewChat?: () => void;
+  liveConversations?: LiveConversation[];
 }
 
 export function PersonasSidebar({
@@ -20,13 +28,24 @@ export function PersonasSidebar({
   onConversationSelect,
   activeConversationId,
   onNewChat,
+  liveConversations = [],
 }: PersonasSidebarProps) {
-  const [conversations, setConversations] = useState(() => getAllConversations().slice(0, 8));
+  const [mockConvs, setMockConvs] = useState(() => getAllConversations().slice(0, 8));
+
+  // Track locally hidden conversation ids (for both live and mock deletes)
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    setConversations((prev) => prev.filter((c) => c.id !== id));
+    setHiddenIds((prev) => new Set([...prev, id]));
   };
+
+  // Merge: live conversations first, then mock ones (exclude any overlapping ids)
+  const liveIds = new Set(liveConversations.map((c) => c.id));
+  const conversations = [
+    ...liveConversations.map((c) => ({ id: c.id, personaId: c.personaId, title: c.title, updatedAt: c.updatedAt, isLive: true })),
+    ...mockConvs.filter((c) => !liveIds.has(c.id)).map((c) => ({ id: c.id, personaId: c.personaId, title: c.title, updatedAt: c.updatedAt, isLive: false })),
+  ].filter((c) => !hiddenIds.has(c.id));
 
   return (
     <div className="zenchat-sidebar flex h-full w-full flex-col overflow-hidden">
@@ -187,13 +206,23 @@ export function PersonasSidebar({
                           style={{ background: persona.color, boxShadow: `0 0 4px ${persona.color}80` }}
                         />
                         <div className="min-w-0 flex-1 pr-5">
-                          <span
-                            className="block truncate text-[12px] leading-tight"
-                            style={{ color: isActive ? '#c8d3e8' : '#4a5c78' }}
-                          >
-                            {conv.title}
-                          </span>
-                          <span className="text-[10px]" style={{ color: '#2a3549' }}>
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className="block truncate text-[12px] leading-tight"
+                              style={{ color: isActive ? '#c8d3e8' : '#4a5c78' }}
+                            >
+                              {conv.title}
+                            </span>
+                            {conv.isLive && (
+                              <span
+                                className="flex-shrink-0 rounded px-1 py-px text-[9px] font-bold uppercase tracking-wider"
+                                style={{ background: `${persona.color}18`, color: persona.color, border: `1px solid ${persona.color}30` }}
+                              >
+                                new
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px]" style={{ color: '#2a3549' }} suppressHydrationWarning>
                             {persona.name} · {formatRelativeTime(conv.updatedAt)}
                           </span>
                         </div>

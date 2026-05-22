@@ -5,8 +5,15 @@ import { ChatWindow } from '@/components/zenchat/chat-window';
 import { mockConversations } from '@/lib/mock/conversations';
 import { type Persona, getPersonaById, personas } from '@/lib/mock/personas';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { Menu } from 'lucide-react';
+import { useCallback, useState } from 'react';
+
+interface LiveConversation {
+  id: string;
+  personaId: string;
+  title: string;
+  updatedAt: Date;
+}
 
 export default function ZenChatPage() {
   const [activePersona, setActivePersona] = useState<Persona>(personas[0]);
@@ -17,6 +24,8 @@ export default function ZenChatPage() {
   >([]);
   const [initialTitle, setInitialTitle] = useState('New conversation');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Live conversations created during this session (prepended to sidebar recent list)
+  const [liveConversations, setLiveConversations] = useState<LiveConversation[]>([]);
 
   const handlePersonaSelect = (persona: Persona) => {
     setActivePersona(persona);
@@ -28,6 +37,19 @@ export default function ZenChatPage() {
   };
 
   const handleConversationSelect = (conversationId: string, personaId: string) => {
+    // Check live conversations first
+    const live = liveConversations.find((c) => c.id === conversationId);
+    if (live) {
+      const persona = getPersonaById(personaId);
+      setActivePersona(persona);
+      setActiveConversationId(conversationId);
+      setInitialMessages([]);
+      setInitialTitle(live.title);
+      setChatKey((k) => k + 1);
+      setSidebarOpen(false);
+      return;
+    }
+    // Fall back to mock conversations
     const conv = mockConversations.find((c) => c.id === conversationId);
     if (!conv) return;
     const persona = getPersonaById(personaId);
@@ -46,6 +68,15 @@ export default function ZenChatPage() {
     setChatKey((k) => k + 1);
   };
 
+  const handleConversationCreated = useCallback((conv: LiveConversation) => {
+    setLiveConversations((prev) => {
+      // Avoid duplicates
+      if (prev.some((c) => c.id === conv.id)) return prev;
+      return [conv, ...prev];
+    });
+    setActiveConversationId(conv.id);
+  }, []);
+
   return (
     <div className="flex h-dvh w-full overflow-hidden" style={{ background: '#080c14' }}>
 
@@ -60,6 +91,7 @@ export default function ZenChatPage() {
           onConversationSelect={handleConversationSelect}
           activeConversationId={activeConversationId}
           onNewChat={handleNewChat}
+          liveConversations={liveConversations}
         />
       </div>
 
@@ -89,6 +121,7 @@ export default function ZenChatPage() {
                 onConversationSelect={handleConversationSelect}
                 activeConversationId={activeConversationId}
                 onNewChat={handleNewChat}
+                liveConversations={liveConversations}
               />
             </motion.div>
           </>
@@ -130,6 +163,7 @@ export default function ZenChatPage() {
             initialMessages={initialMessages}
             initialTitle={initialTitle}
             onNewChat={handleNewChat}
+            onConversationCreated={handleConversationCreated}
           />
         </div>
       </div>

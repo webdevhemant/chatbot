@@ -4,6 +4,7 @@ import { useStreamingText } from '@/lib/mock/streaming';
 import type { Persona } from '@/lib/mock/personas';
 import { MessageBubble } from './message-bubble';
 import type { ResponseSpeed } from './settings-panel';
+import { useMemo, useRef } from 'react';
 
 interface StreamingMessageProps {
   id: string;
@@ -34,6 +35,9 @@ export function StreamingMessage({
   responseSpeed = 'normal',
   searchQuery,
 }: StreamingMessageProps) {
+  // Stable timestamp so the bubble doesn't create a new Date() on every render
+  const timestampRef = useRef(new Date());
+
   const { displayText, isStreaming } = useStreamingText(
     fullText,
     onComplete,
@@ -47,7 +51,7 @@ export function StreamingMessage({
       content={displayText}
       persona={persona}
       isStreaming={isStreaming}
-      timestamp={new Date()}
+      timestamp={timestampRef.current}
       showTimestamp={showTimestamp}
       fontSize={fontSize}
       compact={compact}

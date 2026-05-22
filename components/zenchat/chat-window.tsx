@@ -22,6 +22,7 @@ interface ChatWindowProps {
   initialMessages?: MockMessage[];
   initialTitle?: string;
   onNewChat: () => void;
+  onConversationCreated?: (conv: { id: string; personaId: string; title: string; updatedAt: Date }) => void;
 }
 
 interface ChatMsg {
@@ -48,6 +49,7 @@ function ChatWindowInner({
   initialMessages = [],
   initialTitle = 'New conversation',
   onNewChat,
+  onConversationCreated,
 }: ChatWindowProps) {
   const { toast } = useToast();
   const [messages, setMessages] = useState<ChatMsg[]>(() =>
@@ -64,6 +66,9 @@ function ChatWindowInner({
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
+  // Track whether we've already notified the parent of this conversation's creation
+  const convNotifiedRef = useRef(false);
+  const convIdRef = useRef(`live-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
   // Reset when conversation changes
   useEffect(() => {
@@ -77,6 +82,8 @@ function ChatWindowInner({
     setSearchQuery('');
     setUnreadCount(0);
     setShowScrollBtn(false);
+    convNotifiedRef.current = false;
+    convIdRef.current = `live-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }, [initialMessages, initialTitle]);
 
   // Track scroll position
@@ -93,12 +100,19 @@ function ChatWindowInner({
     return () => el.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Auto-scroll or show button
+  // Auto-scroll during streaming — use RAF to avoid layout thrash on every word
+  const rafScrollRef = useRef<number | null>(null);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+
     if (isAtBottomRef.current) {
-      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      // Cancel any pending RAF scroll
+      if (rafScrollRef.current !== null) cancelAnimationFrame(rafScrollRef.current);
+      rafScrollRef.current = requestAnimationFrame(() => {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+        rafScrollRef.current = null;
+      });
     } else {
       setUnreadCount((n) => n + 1);
     }
@@ -146,8 +160,21 @@ function ChatWindowInner({
 
       setMessages((prev) => [...prev, { id: userMsgId, role: 'user', content: text, timestamp: now }]);
 
+      let title = conversationTitle;
       if (messages.length === 0 && conversationTitle === 'New conversation') {
-        setConversationTitle(text.length > 40 ? `${text.slice(0, 37)}...` : text);
+        title = text.length > 40 ? `${text.slice(0, 37)}...` : text;
+        setConversationTitle(title);
+      }
+
+      // Notify parent to add this to recent conversations (once per session)
+      if (!convNotifiedRef.current && onConversationCreated) {
+        convNotifiedRef.current = true;
+        onConversationCreated({
+          id: convIdRef.current,
+          personaId: persona.id,
+          title,
+          updatedAt: now,
+        });
       }
 
       setShowTyping(true);
@@ -162,7 +189,7 @@ function ChatWindowInner({
         setStreamingId(aiMsgId);
       }, delay);
     },
-    [streamingId, showTyping, messages.length, conversationTitle, pickResponse],
+    [streamingId, showTyping, messages.length, conversationTitle, pickResponse, persona.id, onConversationCreated],
   );
 
   const handleStop = useCallback(() => {
@@ -186,6 +213,8 @@ function ChatWindowInner({
     setSearchOpen(false);
     setSearchQuery('');
     setUnreadCount(0);
+    convNotifiedRef.current = false;
+    convIdRef.current = `live-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     onNewChat();
   }, [onNewChat]);
 
@@ -268,6 +297,23 @@ function ChatWindowInner({
           messages={messages}
           onShowShortcuts={() => setShortcutsOpen(true)}
         />
+
+        {/* Streaming progress bar */}
+        {(streamingId !== null || showTyping) && (
+          <div
+            className="h-0.5 w-full overflow-hidden flex-shrink-0"
+            style={{ background: 'rgba(255,255,255,0.04)' }}
+          >
+            <div
+              className="h-full origin-left"
+              style={{
+                background: `linear-gradient(90deg, ${persona.color}80, ${persona.color}, ${persona.color}80)`,
+                animation: 'streaming-progress 1.8s ease-in-out infinite',
+                backgroundSize: '200% 100%',
+              }}
+            />
+          </div>
+        )}
 
         {/* Search bar */}
         <AnimatePresence>

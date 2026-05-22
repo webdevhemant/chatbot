@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { MarkdownMessage } from './markdown-message';
 import { MessageActions } from './message-actions';
 import { MessageTimestamp } from './message-timestamp';
+import { memo } from 'react';
 
 interface MessageBubbleProps {
   id: string;
@@ -31,7 +32,7 @@ function readTime(words: number) {
   return mins <= 1 ? null : `${mins} min read`;
 }
 
-export function MessageBubble({
+export const MessageBubble = memo(function MessageBubble({
   id,
   role,
   content,
@@ -123,24 +124,13 @@ export function MessageBubble({
               {content}
             </span>
           ) : (
-            <>
-              <MarkdownMessage
-                content={content}
-                personaColor={persona.color}
-                searchQuery={searchQuery}
-                fontSize={fontSize}
-              />
-              {isStreaming && (
-                <span
-                  className="inline-block ml-0.5 w-0.5 h-4 rounded-full align-middle"
-                  style={{
-                    background: persona.color,
-                    animation: 'cursor-blink 0.8s ease-in-out infinite',
-                    verticalAlign: 'text-bottom',
-                  }}
-                />
-              )}
-            </>
+            <MarkdownMessage
+              content={content}
+              personaColor={persona.color}
+              searchQuery={searchQuery}
+              fontSize={fontSize}
+              showCursor={isStreaming}
+            />
           )}
         </div>
 
@@ -156,4 +146,4 @@ export function MessageBubble({
       </div>
     </motion.div>
   );
-}
+});
