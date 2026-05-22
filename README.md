@@ -1,71 +1,183 @@
-<a href="https://chatbot.ai-sdk.dev/demo">
-  <img alt="Chatbot" src="app/(chat)/opengraph-image.png">
-  <h1 align="center">Chatbot</h1>
-</a>
+<div align="center">
+  <img src="app/images/preview.png" alt="ZenChat Preview" width="100%" />
+  <h1>ZenChat</h1>
+  <p>A premium, frontend-only AI chat UI built with Next.js 16 and Tailwind CSS v4.<br/>Five distinct AI personas, real-time streaming simulation, and a polished dark-mode design system.</p>
+</div>
 
 <p align="center">
-    Chatbot (formerly AI Chatbot) is a free, open-source template built with Next.js and the AI SDK that helps you quickly build powerful chatbot applications.
-</p>
-
-<p align="center">
-  <a href="https://chatbot.ai-sdk.dev/docs"><strong>Read Docs</strong></a> ·
   <a href="#features"><strong>Features</strong></a> ·
-  <a href="#model-providers"><strong>Model Providers</strong></a> ·
-  <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
-  <a href="#running-locally"><strong>Running locally</strong></a>
+  <a href="#personas"><strong>Personas</strong></a> ·
+  <a href="#project-structure"><strong>Project Structure</strong></a> ·
+  <a href="#running-locally"><strong>Running Locally</strong></a> ·
+  <a href="#tech-stack"><strong>Tech Stack</strong></a>
 </p>
-<br/>
+
+---
 
 ## Features
 
-- [Next.js](https://nextjs.org) App Router
-  - Advanced routing for seamless navigation and performance
-  - React Server Components (RSCs) and Server Actions for server-side rendering and increased performance
-- [AI SDK](https://ai-sdk.dev/docs/introduction)
-  - Unified API for generating text, structured objects, and tool calls with LLMs
-  - Hooks for building dynamic chat and generative user interfaces
-  - Supports OpenAI, Anthropic, Google, xAI, and other model providers via AI Gateway
-- [shadcn/ui](https://ui.shadcn.com)
-  - Styling with [Tailwind CSS](https://tailwindcss.com)
-  - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
-- Data Persistence
-  - [Neon Serverless Postgres](https://vercel.com/marketplace/neon) for saving chat history and user data
-  - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
-- [Auth.js](https://authjs.dev)
-  - Simple and secure authentication
+### Chat Experience
+- **Streaming simulation** — word-by-word text streaming with configurable speed (fast / normal / slow)
+- **Typing indicator** — animated 3-dot indicator shown before a response begins
+- **Stop generation** — red square button cancels an in-progress response
+- **Date dividers** — messages grouped by Today / Yesterday / formatted date
+- **Scroll-to-bottom** — floating button with unread message count badge
 
-## Model Providers
+### Markdown Rendering
+Custom renderer (no external library) supporting:
+- Fenced code blocks with language label and one-click copy button
+- Inline code, `**bold**`, `*italic*`
+- H1 – H3 headings
+- Unordered and ordered lists with persona-colored bullets / number circles
+- Blockquotes with persona-colored left border
+- Horizontal rules
 
-This template uses the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) to access multiple AI models through a unified interface. Models are configured in `lib/ai/models.ts` with per-model provider routing. Included models: Mistral, Moonshot, DeepSeek, OpenAI, and xAI.
+### Message Actions
+- **Copy** — clipboard copy with checkmark feedback (2 s)
+- **Reactions** — thumbs up / down toggle (green / red) per message
 
-### AI Gateway Authentication
+### Search
+- `Cmd+F` opens an inline search bar
+- Real-time query highlighting across all messages
+- Match counter (`2 / 7`) with no-results state
 
-**For Vercel deployments**: Authentication is handled automatically via OIDC tokens.
+### Export
+- **Export as .txt** — markdown-formatted transcript
+- **Export as .json** — structured data with persona metadata
 
-**For non-Vercel deployments**: You need to provide an AI Gateway API key by setting the `AI_GATEWAY_API_KEY` environment variable in your `.env.local` file.
+### Settings Panel
+- Font size: Small / Medium / Large
+- Streaming speed: Fast / Normal / Slow
+- Show timestamps toggle
+- Compact messages toggle
 
-With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to direct LLM providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
+### Keyboard Shortcuts
 
-## Deploy Your Own
+| Shortcut | Action |
+|---|---|
+| `Enter` | Send message |
+| `Shift + Enter` | New line in input |
+| `Cmd + F` | Search messages |
+| `Cmd + K` | New conversation |
+| `Cmd + /` | Show shortcuts modal |
+| `Esc` | Close panel / cancel |
 
-You can deploy your own version of Chatbot to Vercel with one click:
+### Mobile
+- Hamburger menu reveals persona sidebar as a full-screen overlay
+- Top bar shows active persona avatar + name on small screens
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/templates/next.js/chatbot)
+### Toast Notifications
+- Success / error / info variants with auto-dismiss (3.5 s)
+- Shown on: response stopped, copy success, export complete
 
-## Running locally
+---
 
-You will need to use the environment variables [defined in `.env.example`](.env.example) to run Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary.
+## Personas
 
-> Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various AI and authentication provider accounts.
+| Persona | Color | Personality |
+|---|---|---|
+| **Zen** | Blue `#60a5fa` | Calm, mindful, poetic — uses nature metaphors |
+| **Sage** | Purple `#a78bfa` | Philosophical, scholarly, references history |
+| **Spark** | Yellow `#fbbf24` | Direct, energetic, uses code examples and lists |
+| **Oracle** | Teal `#2dd4bf` | Mysterious, Socratic — answers questions with questions |
+| **Nova** | Amber `#f59e0b` | Warm, encouraging, emotionally supportive |
 
-1. Install Vercel CLI: `npm i -g vercel`
-2. Link local instance with Vercel and GitHub accounts (creates `.vercel` directory): `vercel link`
-3. Download your environment variables: `vercel env pull`
+Each persona has its own color system, gradient, avatar, tagline, trait chips, and set of suggested prompts.
+
+---
+
+## Project Structure
+
+```
+chatbot/
+├── app/
+│   ├── (chat)/
+│   │   ├── page.tsx          # Main chat page (mobile sidebar, layout)
+│   │   └── layout.tsx        # Passthrough layout
+│   ├── globals.css           # Tailwind v4 theme, design tokens, animations
+│   ├── icon.svg              # ZenChat branded favicon
+│   └── layout.tsx            # Root layout (fonts, metadata, ThemeProvider)
+│
+├── components/
+│   └── zenchat/
+│       ├── chat-window.tsx       # Core chat logic, scroll tracking, keyboard shortcuts
+│       ├── chat-header.tsx       # Persona info, title edit, settings/export/search buttons
+│       ├── chat-input.tsx        # Textarea, char counter, send/stop button
+│       ├── personas-sidebar.tsx  # Persona selector + recent conversations list
+│       ├── welcome-screen.tsx    # Empty state with avatar, traits, suggested prompts
+│       ├── message-bubble.tsx    # Individual message (user + assistant)
+│       ├── streaming-message.tsx # Wraps MessageBubble with streaming hook
+│       ├── markdown-message.tsx  # Custom markdown renderer
+│       ├── message-actions.tsx   # Copy + reaction buttons (hover-revealed)
+│       ├── message-timestamp.tsx # Formatted time display
+│       ├── date-divider.tsx      # Today / Yesterday / date label between messages
+│       ├── search-bar.tsx        # Inline search input with match count
+│       ├── scroll-to-bottom.tsx  # Floating button with unread badge
+│       ├── typing-indicator.tsx  # Animated 3-dot indicator
+│       ├── settings-panel.tsx    # Font size, speed, toggles dropdown
+│       ├── export-menu.tsx       # Export as .txt / .json dropdown
+│       ├── keyboard-shortcuts.tsx # Shortcuts modal (Cmd+/)
+│       └── toast.tsx             # ToastProvider + useToast hook
+│
+└── lib/
+    ├── mock/
+    │   ├── personas.ts       # 5 persona definitions (avatar, color, traits, prompts)
+    │   ├── conversations.ts  # Mock conversation history + formatRelativeTime
+    │   └── streaming.ts      # useStreamingText hook (word-by-word with speed control)
+    └── ai/
+        └── models.ts         # Model type definition (id, name, description)
+```
+
+---
+
+## Running Locally
+
+**Requirements:** Node.js 18+ (tested on v22), pnpm
 
 ```bash
+# 1. Clone
+git clone https://github.com/webdevhemant/chatbot.git
+cd chatbot
+
+# 2. Install dependencies
 pnpm install
-pnpm db:migrate # Setup database or apply latest database changes
+
+# 3. Start dev server
 pnpm dev
 ```
 
-Your app template should now be running on [localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000).
+
+No environment variables, no database, no API keys required. Everything runs entirely in the browser.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16.2 (App Router, Turbopack) |
+| Styling | Tailwind CSS v4 with custom CSS variables |
+| Animations | Framer Motion |
+| Icons | Lucide React |
+| Fonts | Geist + Geist Mono (Google Fonts) |
+| Type checking | TypeScript 5 (strict) |
+| Package manager | pnpm |
+
+---
+
+## Design System
+
+The app uses a custom dark-mode design system defined in `app/globals.css`:
+
+- **Background:** `#080c14` (deep navy)
+- **Cards:** `#0d1220`
+- **Glassmorphism** utilities: `.glass`, `.glass-heavy`
+- **Aurora background** animations per persona
+- **Glow effects** per persona color
+- **Text gradients** per persona
+- CSS custom properties for all persona colors, shadows, easing curves
+
+---
+
+> This is a pure frontend project — no backend, no database, no authentication, no API calls. All responses are mock data rendered locally.
