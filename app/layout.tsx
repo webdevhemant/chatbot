@@ -6,8 +6,12 @@ import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://zenchat.ai'),
-  title: 'ZenChat — AI Assistant UI Kit',
-  description: 'A beautiful, frontend-only AI chat UI kit with premium dark mode design.',
+  title: 'ZenChat — AI Personas',
+  description: 'A beautiful AI chat experience with multiple personas. Mindful, wise, energetic, mysterious, and warm.',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+  },
 };
 
 export const viewport = {

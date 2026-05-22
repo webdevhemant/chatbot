@@ -2,7 +2,7 @@
 
 import type { Persona } from '@/lib/mock/personas';
 import { motion } from 'framer-motion';
-import { Download, PenLine, Plus, Search, Settings } from 'lucide-react';
+import { Download, Keyboard, PenLine, Plus, Search, Settings } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import type { ChatSettings } from './settings-panel';
 import { SettingsPanel } from './settings-panel';
@@ -23,6 +23,7 @@ interface ChatHeaderProps {
   settings: ChatSettings;
   onSettingsChange: (s: ChatSettings) => void;
   messages: ChatMsg[];
+  onShowShortcuts?: () => void;
 }
 
 export function ChatHeader({
@@ -34,6 +35,7 @@ export function ChatHeader({
   settings,
   onSettingsChange,
   messages,
+  onShowShortcuts,
 }: ChatHeaderProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editValue, setEditValue] = useState(conversationTitle);
@@ -135,6 +137,12 @@ export function ChatHeader({
         <IconBtn title="Search (⌘F)" onClick={onToggleSearch} persona={persona}>
           <Search className="h-3.5 w-3.5" />
         </IconBtn>
+
+        {onShowShortcuts && (
+          <IconBtn title="Keyboard shortcuts (⌘/)" onClick={onShowShortcuts} persona={persona}>
+            <Keyboard className="h-3.5 w-3.5" />
+          </IconBtn>
+        )}
 
         <IconBtn
           title="Export"

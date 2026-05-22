@@ -2,6 +2,7 @@
 
 import type { Persona } from '@/lib/mock/personas';
 import { motion } from 'framer-motion';
+import { MarkdownMessage } from './markdown-message';
 import { MessageActions } from './message-actions';
 import { MessageTimestamp } from './message-timestamp';
 
@@ -19,52 +20,16 @@ interface MessageBubbleProps {
   searchQuery?: string;
 }
 
-function highlightText(text: string, query: string): React.ReactNode {
-  if (!query.trim()) return <BoldText text={text} />;
-  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  const parts = text.split(regex);
-  return (
-    <>
-      {parts.map((part, i) =>
-        regex.test(part) ? (
-          <mark
-            key={i}
-            style={{
-              background: 'rgba(251,191,36,0.3)',
-              color: '#fde68a',
-              borderRadius: '2px',
-              padding: '0 2px',
-            }}
-          >
-            {part}
-          </mark>
-        ) : (
-          <BoldText key={i} text={part} />
-        ),
-      )}
-    </>
-  );
-}
-
-function BoldText({ text }: { text: string }) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return (
-    <>
-      {parts.map((part, i) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return (
-            <strong key={i} className="font-semibold" style={{ color: 'inherit', opacity: 0.95 }}>
-              {part.slice(2, -2)}
-            </strong>
-          );
-        }
-        return <span key={i}>{part}</span>;
-      })}
-    </>
-  );
-}
-
 const fontSizeMap = { sm: '12px', md: '14px', lg: '16px' } as const;
+
+function wordCount(text: string) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function readTime(words: number) {
+  const mins = Math.ceil(words / 200);
+  return mins <= 1 ? null : `${mins} min read`;
+}
 
 export function MessageBubble({
   id,
@@ -80,14 +45,17 @@ export function MessageBubble({
   searchQuery = '',
 }: MessageBubbleProps) {
   const isUser = role === 'user';
+  const words = wordCount(content);
+  const rt = !isStreaming && !isUser ? readTime(words) : null;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.3, delay: animationDelay, ease: [0.16, 1, 0.3, 1] }}
-      className={`group flex w-full gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} ${compact ? 'gap-2' : 'gap-3'}`}
+      className={`group flex w-full ${isUser ? 'flex-row-reverse' : 'flex-row'} ${compact ? 'gap-2' : 'gap-3'}`}
     >
+      {/* Avatar */}
       {!isUser && (
         <div className="flex-shrink-0 pt-0.5">
           <div
@@ -105,55 +73,63 @@ export function MessageBubble({
         </div>
       )}
 
-      <div className={`flex max-w-[75%] flex-col gap-0.5 ${isUser ? 'items-end' : 'items-start'}`}>
+      <div className={`flex flex-col gap-0.5 ${isUser ? 'items-end' : 'items-start'}`} style={{ maxWidth: '75%' }}>
+        {/* Name row */}
         {!isUser && !compact && (
           <div className="flex items-center gap-2 px-1">
             <span className="text-xs font-semibold tracking-tight" style={{ color: persona.color }}>
               {persona.name}
             </span>
-            {isStreaming && (
+            {isStreaming ? (
               <div className="flex items-center gap-0.5">
                 {[0, 1, 2].map((i) => (
                   <div
                     key={i}
                     className="h-1 w-1 rounded-full"
-                    style={{
-                      background: persona.color,
-                      animation: `dot-pulse 1.4s ease-in-out ${i * 0.16}s infinite`,
-                    }}
+                    style={{ background: persona.color, animation: `dot-pulse 1.4s ease-in-out ${i * 0.16}s infinite` }}
                   />
                 ))}
               </div>
-            )}
+            ) : rt ? (
+              <span className="text-[10px] text-[#2a3549]">{rt}</span>
+            ) : null}
           </div>
         )}
 
+        {/* Bubble */}
         <div
-          className={`relative rounded-2xl leading-relaxed ${isUser ? 'rounded-tr-sm' : 'rounded-tl-sm'}`}
+          className={`relative rounded-2xl ${isUser ? 'rounded-tr-sm' : 'rounded-tl-sm'}`}
           style={{
-            fontSize: fontSizeMap[fontSize],
             padding: compact ? '8px 14px' : '12px 16px',
             ...(isUser
               ? {
                   background: persona.gradient,
                   color: 'rgba(255,255,255,0.95)',
                   boxShadow: `0 4px 20px ${persona.color}25, 0 1px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)`,
+                  fontSize: fontSizeMap[fontSize],
                 }
               : {
-                  background: 'rgba(255, 255, 255, 0.04)',
+                  background: 'rgba(255,255,255,0.04)',
                   backdropFilter: 'blur(20px)',
                   WebkitBackdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255, 255, 255, 0.07)',
+                  border: '1px solid rgba(255,255,255,0.07)',
                   color: '#c8d3e8',
                   boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
                 }),
           }}
         >
           {isUser ? (
-            highlightText(content, searchQuery)
+            <span style={{ fontSize: fontSizeMap[fontSize], lineHeight: '1.6' }}>
+              {content}
+            </span>
           ) : (
-            <span>
-              {highlightText(content, searchQuery)}
+            <>
+              <MarkdownMessage
+                content={content}
+                personaColor={persona.color}
+                searchQuery={searchQuery}
+                fontSize={fontSize}
+              />
               {isStreaming && (
                 <span
                   className="inline-block ml-0.5 w-0.5 h-4 rounded-full align-middle"
@@ -164,15 +140,16 @@ export function MessageBubble({
                   }}
                 />
               )}
-            </span>
+            </>
           )}
         </div>
 
+        {/* Timestamp */}
         {showTimestamp && timestamp && (
           <MessageTimestamp timestamp={timestamp} role={role} />
         )}
 
-        {/* Actions — visible on hover */}
+        {/* Hover actions */}
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150">
           <MessageActions content={content} role={role} persona={persona} messageId={id} />
         </div>
