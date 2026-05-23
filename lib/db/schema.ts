@@ -1,4 +1,4 @@
-// Stub types for frontend-only APPNAME — no database
+// Stub types for frontend-only HiveChat — no database
 
 export type Chat = {
   id: string;

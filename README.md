@@ -1,8 +1,8 @@
 <div align="center">
-  <h1>APPNAME</h1>
+  <h1>HiveChat</h1>
   <p>A premium, frontend-only AI chat UI built with Next.js 16 and Tailwind CSS v4.<br/>Five distinct AI personas, real-time streaming simulation, and a polished dark-mode design system.</p>
   <p>
-    <a href="https://APPURL.vercel.app"><strong>APPURL.vercel.app</strong></a>
+    <a href="https://hivechat.vercel.app"><strong>hivechat.vercel.app</strong></a>
   </p>
 </div>
 
@@ -108,7 +108,7 @@ chatbot/
 │   │   │   └── page.tsx      # Plan comparison & upgrade page
 │   │   └── layout.tsx        # Passthrough layout
 │   ├── globals.css           # Tailwind v4 theme, design tokens, animations
-│   ├── icon.svg              # APPNAME branded favicon
+│   ├── icon.svg              # HiveChat branded favicon
 │   └── layout.tsx            # Root layout (fonts, metadata, providers)
 │
 ├── components/

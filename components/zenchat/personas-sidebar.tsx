@@ -82,7 +82,7 @@ export function PersonasSidebar({
                 className="text-[13px] font-semibold tracking-tight"
                 style={{ color: '#dde4f0', letterSpacing: '-0.01em' }}
               >
-                APPNAME
+                HiveChat
               </span>
             </div>
 

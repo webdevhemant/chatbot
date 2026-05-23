@@ -783,7 +783,7 @@ function AboutSection({ accent }: { accent: string }) {
           <Sparkles className="h-6 w-6" style={{ color: accent }} />
         </div>
         <div>
-          <p className="text-[16px] font-bold" style={{ color: '#dde4f0', letterSpacing: '-0.02em' }}>APPNAME</p>
+          <p className="text-[16px] font-bold" style={{ color: '#dde4f0', letterSpacing: '-0.02em' }}>HiveChat</p>
           <p className="text-[12px]" style={{ color: '#2d3d55' }}>AI Personas · Frontend Edition</p>
         </div>
       </div>
@@ -811,7 +811,7 @@ function AboutSection({ accent }: { accent: string }) {
         style={{ background: `${accent}0a`, border: `1px solid ${accent}20` }}
       >
         <p className="text-[12px] leading-relaxed" style={{ color: '#4a5c78' }}>
-          APPNAME is a frontend-only AI chat interface with 5 distinct AI personas. No backend, no API keys required — all responses are intelligently mocked with realistic streaming simulation.
+          HiveChat is a frontend-only AI chat interface with 5 distinct AI personas. No backend, no API keys required — all responses are intelligently mocked with realistic streaming simulation.
         </p>
       </div>
     </div>
@@ -960,17 +960,6 @@ export function SettingsModal({
                     );
                   })}
                 </nav>
-
-                {/* Version badge */}
-                <div className="flex-shrink-0 px-4 pb-4">
-                  <div
-                    className="rounded-xl px-3 py-2"
-                    style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.04)' }}
-                  >
-                    <p className="text-[10px]" style={{ color: '#1e2d42' }}>APPNAME v1.0.0</p>
-                    <p className="text-[10px]" style={{ color: '#1a2535' }}>Frontend Edition</p>
-                  </div>
-                </div>
               </div>
 
               {/* ── Right content ── */}

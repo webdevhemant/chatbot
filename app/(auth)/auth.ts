@@ -1,4 +1,4 @@
-// Stub auth — APPNAME is frontend-only, no real authentication
+// Stub auth — HiveChat is frontend-only, no real authentication
 
 export async function signOut(_options?: { redirectTo?: string }) {
   // No-op in frontend-only mode

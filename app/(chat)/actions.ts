@@ -1,5 +1,5 @@
 'use server'
-// Server actions removed — APPNAME is frontend-only
+// Server actions removed — HiveChat is frontend-only
 
 export async function saveChatModelAsCookie(_model: string) {
   return
