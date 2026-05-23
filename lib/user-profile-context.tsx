@@ -80,7 +80,7 @@ interface UserProfileContextValue {
 
 const DEFAULT_PROFILE: UserProfile = {
   name: 'Hemant',
-  email: 'akshaybendadi@gmail.com',
+  email: '',
   themeId: 'midnight',
 };
 
@@ -103,10 +103,14 @@ function applyTheme(theme: AppTheme) {
   document.documentElement.setAttribute('data-theme', theme.id);
 }
 
+const STORAGE_KEY = 'zenchat-profile-v2';
+
 function loadProfile(): UserProfile {
   if (typeof window === 'undefined') return DEFAULT_PROFILE;
   try {
-    const raw = localStorage.getItem('zenchat-profile');
+    // Clear old v1 key if present
+    localStorage.removeItem('zenchat-profile');
+    const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { ...DEFAULT_PROFILE, ...JSON.parse(raw) };
   } catch {
     // ignore
@@ -129,7 +133,7 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     setProfile((prev) => {
       const next = { ...prev, ...patch };
       try {
-        localStorage.setItem('zenchat-profile', JSON.stringify(next));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       } catch {
         // ignore
       }

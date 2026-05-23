@@ -325,12 +325,14 @@ export function PersonasSidebar({
               >
                 {profile.name}
               </p>
-              <p
-                className="truncate text-[10px] leading-tight"
-                style={{ color: '#2a3a52' }}
-              >
-                {profile.email}
-              </p>
+              {profile.email && (
+                <p
+                  className="truncate text-[10px] leading-tight"
+                  style={{ color: '#2a3a52' }}
+                >
+                  {profile.email}
+                </p>
+              )}
             </div>
           </div>
         </div>
