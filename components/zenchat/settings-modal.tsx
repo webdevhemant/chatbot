@@ -9,10 +9,12 @@ import type { ChatSettings, FontSize, ResponseSpeed, SendKey } from './settings-
 import {
   AlertCircle,
   ArrowDownToLine,
+  ArrowRight,
   Check,
   Clock3,
   CornerDownLeft,
   Cpu,
+  Crown,
   Info,
   LayoutList,
   MessageSquare,
@@ -26,6 +28,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
 // ─── Validation ───────────────────────────────────────────────────────────────
@@ -49,12 +52,13 @@ function validateEmail(v: string): string | null {
 
 // ─── Nav sections ─────────────────────────────────────────────────────────────
 
-type Section = 'profile' | 'appearance' | 'chat' | 'about';
+type Section = 'profile' | 'appearance' | 'chat' | 'plan' | 'about';
 
 const NAV: { id: Section; label: string; icon: React.FC<{ className?: string; style?: React.CSSProperties }> }[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'chat', label: 'Chat settings', icon: MessageSquare },
+  { id: 'plan', label: 'Plan & billing', icon: Crown },
   { id: 'about', label: 'About', icon: Info },
 ];
 
@@ -300,9 +304,9 @@ function TokenUsage({ accent }: { accent: string }) {
       {/* Breakdown */}
       <div className="grid grid-cols-3 gap-2 pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
         {[
-          { label: 'Input', value: '612k', pct: 72 },
-          { label: 'Output', value: '235k', pct: 28 },
-          { label: 'Remaining', value: `${Number((TOKEN_PLAN.total - TOKEN_PLAN.used) / 1000).toFixed(0)}k`, pct: Math.round((1 - pct) * 100) },
+          { label: 'Input', value: '612k' },
+          { label: 'Output', value: '235k' },
+          { label: 'Remaining', value: `${Number((TOKEN_PLAN.total - TOKEN_PLAN.used) / 1000).toFixed(0)}k` },
         ].map((item) => (
           <div key={item.label} className="flex flex-col gap-0.5">
             <span className="text-[10px]" style={{ color: '#2d3d55' }}>{item.label}</span>
@@ -310,6 +314,25 @@ function TokenUsage({ accent }: { accent: string }) {
           </div>
         ))}
       </div>
+
+      {/* Upgrade nudge */}
+      <Link
+        href="/upgrade"
+        className="flex items-center justify-between rounded-xl px-3 py-2.5 transition-all duration-150"
+        style={{
+          background: `${accent}10`,
+          border: `1px solid ${accent}25`,
+          marginTop: '4px',
+        }}
+        onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = `${accent}18`)}
+        onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = `${accent}10`)}
+      >
+        <div className="flex items-center gap-2">
+          <Crown className="h-3.5 w-3.5" style={{ color: accent }} />
+          <span className="text-[12px] font-medium" style={{ color: accent }}>View plans & upgrade</span>
+        </div>
+        <ArrowRight className="h-3.5 w-3.5" style={{ color: accent }} />
+      </Link>
     </div>
   );
 }
@@ -661,6 +684,83 @@ function ChatSettingsSection({
   );
 }
 
+function PlanSection({ accent }: { accent: string }) {
+  return (
+    <div className="flex flex-col gap-5">
+      {/* Current plan card */}
+      <div
+        className="flex items-center justify-between rounded-2xl p-4"
+        style={{ background: `${accent}0d`, border: `1px solid ${accent}30` }}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="flex h-9 w-9 items-center justify-center rounded-xl"
+            style={{ background: `${accent}20`, border: `1px solid ${accent}30` }}
+          >
+            <Zap className="h-4.5 w-4.5" style={{ color: accent }} />
+          </div>
+          <div>
+            <p className="text-[14px] font-semibold" style={{ color: '#dde4f0' }}>Pro plan</p>
+            <p className="text-[11px]" style={{ color: '#3d4f6e' }}>Renews Jun 1, 2026 · $18 / mo</p>
+          </div>
+        </div>
+        <span
+          className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
+          style={{ background: `${accent}20`, color: accent, border: `1px solid ${accent}35` }}
+        >
+          Active
+        </span>
+      </div>
+
+      {/* Token usage */}
+      <TokenUsage accent={accent} />
+
+      {/* Upgrade CTA */}
+      <Link
+        href="/upgrade"
+        className="flex items-center justify-between rounded-2xl p-4 transition-all duration-150"
+        style={{
+          background: 'rgba(255,255,255,0.025)',
+          border: '1px solid rgba(255,255,255,0.07)',
+        }}
+        onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = 'rgba(255,255,255,0.05)')}
+        onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = 'rgba(255,255,255,0.025)')}
+      >
+        <div>
+          <p className="text-[13px] font-semibold" style={{ color: '#c8d3e8' }}>Upgrade to Team</p>
+          <p className="text-[11px] mt-0.5" style={{ color: '#2d3d55' }}>Shared workspaces, custom personas, analytics</p>
+        </div>
+        <ArrowRight className="h-4 w-4 flex-shrink-0" style={{ color: '#3d4f6e' }} />
+      </Link>
+
+      {/* Billing info rows */}
+      <div>
+        <SectionHeading>Billing details</SectionHeading>
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          {[
+            { label: 'Payment method', value: '•••• 4242 (Visa)' },
+            { label: 'Billing cycle', value: 'Monthly' },
+            { label: 'Next invoice', value: 'Jun 1, 2026' },
+            { label: 'Invoice history', value: 'View invoices →' },
+          ].map((row, i, arr) => (
+            <div
+              key={row.label}
+              className="flex items-center justify-between px-4 py-3"
+              style={{ borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
+            >
+              <span className="text-[12px]" style={{ color: '#3d4f6e' }}>{row.label}</span>
+              <span className="text-[12px] font-medium" style={{ color: '#5a6a85' }}>{row.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AboutSection({ accent }: { accent: string }) {
   const items = [
     { label: 'Version', value: '1.0.0' },
@@ -683,7 +783,7 @@ function AboutSection({ accent }: { accent: string }) {
           <Sparkles className="h-6 w-6" style={{ color: accent }} />
         </div>
         <div>
-          <p className="text-[16px] font-bold" style={{ color: '#dde4f0', letterSpacing: '-0.02em' }}>ZenChat</p>
+          <p className="text-[16px] font-bold" style={{ color: '#dde4f0', letterSpacing: '-0.02em' }}>APPNAME</p>
           <p className="text-[12px]" style={{ color: '#2d3d55' }}>AI Personas · Frontend Edition</p>
         </div>
       </div>
@@ -711,7 +811,7 @@ function AboutSection({ accent }: { accent: string }) {
         style={{ background: `${accent}0a`, border: `1px solid ${accent}20` }}
       >
         <p className="text-[12px] leading-relaxed" style={{ color: '#4a5c78' }}>
-          ZenChat is a frontend-only AI chat interface with 5 distinct AI personas. No backend, no API keys required — all responses are intelligently mocked with realistic streaming simulation.
+          APPNAME is a frontend-only AI chat interface with 5 distinct AI personas. No backend, no API keys required — all responses are intelligently mocked with realistic streaming simulation.
         </p>
       </div>
     </div>
@@ -756,6 +856,7 @@ export function SettingsModal({
     profile: 'Profile',
     appearance: 'Appearance',
     chat: 'Chat settings',
+    plan: 'Plan & billing',
     about: 'About',
   };
 
@@ -866,7 +967,7 @@ export function SettingsModal({
                     className="rounded-xl px-3 py-2"
                     style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.04)' }}
                   >
-                    <p className="text-[10px]" style={{ color: '#1e2d42' }}>ZenChat v1.0.0</p>
+                    <p className="text-[10px]" style={{ color: '#1e2d42' }}>APPNAME v1.0.0</p>
                     <p className="text-[10px]" style={{ color: '#1a2535' }}>Frontend Edition</p>
                   </div>
                 </div>
@@ -923,6 +1024,7 @@ export function SettingsModal({
                           accent={accent}
                         />
                       )}
+                      {activeSection === 'plan' && <PlanSection accent={accent} />}
                       {activeSection === 'about' && <AboutSection accent={accent} />}
                     </motion.div>
                   </AnimatePresence>

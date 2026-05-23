@@ -103,13 +103,13 @@ function applyTheme(theme: AppTheme) {
   document.documentElement.setAttribute('data-theme', theme.id);
 }
 
-const STORAGE_KEY = 'zenchat-profile-v2';
+const STORAGE_KEY = 'appname-profile-v2';
 
 function loadProfile(): UserProfile {
   if (typeof window === 'undefined') return DEFAULT_PROFILE;
   try {
     // Clear old v1 key if present
-    localStorage.removeItem('zenchat-profile');
+    localStorage.removeItem('appname-profile');
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { ...DEFAULT_PROFILE, ...JSON.parse(raw) };
   } catch {

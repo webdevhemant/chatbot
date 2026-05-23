@@ -15,7 +15,7 @@ interface LiveConversation {
   updatedAt: Date;
 }
 
-export default function ZenChatPage() {
+export default function HaloPage() {
   const [activePersona, setActivePersona] = useState<Persona>(personas[0]);
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined);
   const [chatKey, setChatKey] = useState(0);

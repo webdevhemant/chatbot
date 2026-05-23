@@ -175,7 +175,7 @@ export function ChatHeader({
   const [editValue, setEditValue] = useState(conversationTitle);
   const [exportOpen, setExportOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsInitialSection, setSettingsInitialSection] = useState<'profile' | 'appearance' | 'chat' | 'about'>('profile');
+  const [settingsInitialSection, setSettingsInitialSection] = useState<'profile' | 'appearance' | 'chat' | 'plan' | 'about'>('profile');
 
   const exportBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -194,7 +194,7 @@ export function ChatHeader({
     [commitEdit, conversationTitle],
   );
 
-  const openSettings = (section: 'profile' | 'appearance' | 'chat' | 'about' = 'profile') => {
+  const openSettings = (section: 'profile' | 'appearance' | 'chat' | 'plan' | 'about' = 'profile') => {
     setSettingsInitialSection(section);
     setSettingsOpen(true);
     setExportOpen(false);
