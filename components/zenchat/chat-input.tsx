@@ -12,11 +12,12 @@ interface ChatInputProps {
   onStop?: () => void;
   isStreaming: boolean;
   fontSize?: 'sm' | 'md' | 'lg';
+  sendKey?: 'enter' | 'cmd-enter';
 }
 
 const fontSizeMap = { sm: '12px', md: '14px', lg: '16px' } as const;
 
-export function ChatInput({ persona, onSend, onStop, isStreaming, fontSize = 'md' }: ChatInputProps) {
+export function ChatInput({ persona, onSend, onStop, isStreaming, fontSize = 'md', sendKey = 'enter' }: ChatInputProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -51,17 +52,21 @@ export function ChatInput({ persona, onSend, onStop, isStreaming, fontSize = 'md
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      // Cmd/Ctrl+F — handled by parent via keyboard shortcut
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleSend();
-      }
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        handleSend();
+      if (sendKey === 'enter') {
+        // Enter sends, Shift+Enter is newline
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
+      } else {
+        // Cmd/Ctrl+Enter sends, bare Enter is newline
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          handleSend();
+        }
       }
     },
-    [handleSend],
+    [handleSend, sendKey],
   );
 
   const canSend = value.trim().length > 0 && !isStreaming;
@@ -96,7 +101,7 @@ export function ChatInput({ persona, onSend, onStop, isStreaming, fontSize = 'md
           placeholder={
             isStreaming
               ? `${persona.name} is thinking...`
-              : `Message ${persona.name}… (Enter to send, Shift+Enter for new line)`
+              : `Message ${persona.name}…`
           }
           rows={1}
           className="w-full resize-none bg-transparent px-4 py-3.5 pr-14 placeholder-[#2d3d55] outline-none transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50"
@@ -158,7 +163,7 @@ export function ChatInput({ persona, onSend, onStop, isStreaming, fontSize = 'md
       {/* Hint row */}
       <div className="mt-1.5 flex items-center justify-between px-1">
         <span className="text-[10px] text-[#1e2d42]">
-          Enter to send · Shift+Enter for new line
+          {sendKey === 'enter' ? 'Enter to send · Shift+Enter for new line' : '⌘Enter to send · Enter for new line'}
         </span>
         {isStreaming && (
           <span className="text-[10px] text-[#2d3d55] animate-pulse">

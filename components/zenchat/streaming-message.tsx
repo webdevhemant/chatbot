@@ -17,6 +17,7 @@ interface StreamingMessageProps {
   compact?: boolean;
   responseSpeed?: ResponseSpeed;
   searchQuery?: string;
+  showReadTime?: boolean;
 }
 
 const speedMultiplier: Record<ResponseSpeed, number> = {
@@ -35,6 +36,7 @@ export function StreamingMessage({
   compact,
   responseSpeed = 'normal',
   searchQuery,
+  showReadTime,
 }: StreamingMessageProps) {
   // Stable timestamp — don't create new Date() on every render
   const timestampRef = useRef(new Date());
@@ -64,6 +66,7 @@ export function StreamingMessage({
       fontSize={fontSize}
       compact={compact}
       searchQuery={searchQuery}
+      showReadTime={showReadTime}
     />
   );
 }

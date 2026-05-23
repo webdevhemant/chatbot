@@ -6,6 +6,8 @@ import { X, Type, Zap, Moon } from 'lucide-react';
 
 export type FontSize = 'sm' | 'md' | 'lg';
 export type ResponseSpeed = 'fast' | 'normal' | 'slow';
+export type SendKey = 'enter' | 'cmd-enter';
+export type MessageGrouping = 'grouped' | 'individual';
 
 export interface ChatSettings {
   fontSize: FontSize;
@@ -13,6 +15,16 @@ export interface ChatSettings {
   showTimestamps: boolean;
   soundEnabled: boolean;
   compactMode: boolean;
+  /** Whether Enter sends or Cmd+Enter sends */
+  sendKey: SendKey;
+  /** Group consecutive messages from same sender */
+  messageGrouping: MessageGrouping;
+  /** Auto-scroll to bottom during streaming */
+  autoScroll: boolean;
+  /** Show word count and read time on assistant messages */
+  showReadTime: boolean;
+  /** Reduce motion (disables framer-motion animations) */
+  reduceMotion: boolean;
 }
 
 export const defaultSettings: ChatSettings = {
@@ -21,6 +33,11 @@ export const defaultSettings: ChatSettings = {
   showTimestamps: false,
   soundEnabled: false,
   compactMode: false,
+  sendKey: 'enter',
+  messageGrouping: 'grouped',
+  autoScroll: true,
+  showReadTime: true,
+  reduceMotion: false,
 };
 
 interface SettingsPanelProps {

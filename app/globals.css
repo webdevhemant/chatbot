@@ -162,6 +162,22 @@
     position: relative;
   }
 
+  /* All interactive elements get pointer cursor */
+  button,
+  [role="button"],
+  [role="switch"],
+  [role="tab"],
+  label[for],
+  a {
+    cursor: pointer;
+  }
+
+  /* Disabled elements get not-allowed */
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.025em;
     line-height: 1.2;

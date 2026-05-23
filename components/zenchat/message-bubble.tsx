@@ -19,6 +19,7 @@ interface MessageBubbleProps {
   fontSize?: 'sm' | 'md' | 'lg';
   compact?: boolean;
   searchQuery?: string;
+  showReadTime?: boolean;
 }
 
 const fontSizeMap = { sm: '12px', md: '14px', lg: '16px' } as const;
@@ -44,10 +45,11 @@ export const MessageBubble = memo(function MessageBubble({
   fontSize = 'md',
   compact = false,
   searchQuery = '',
+  showReadTime = true,
 }: MessageBubbleProps) {
   const isUser = role === 'user';
   const words = wordCount(content);
-  const rt = !isStreaming && !isUser ? readTime(words) : null;
+  const rt = showReadTime && !isStreaming && !isUser ? readTime(words) : null;
 
   return (
     <motion.div

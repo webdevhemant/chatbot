@@ -78,7 +78,7 @@ export default function ZenChatPage() {
   }, []);
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden" style={{ background: '#080c14' }}>
+    <div className="flex h-dvh w-full overflow-hidden" style={{ background: 'var(--background)' }}>
 
       {/* ── Desktop sidebar ── */}
       <div

@@ -1,12 +1,12 @@
 'use client';
 
 import type { Persona } from '@/lib/mock/personas';
+import { getInitials, useUserProfile } from '@/lib/user-profile-context';
 import { motion } from 'framer-motion';
 import {
   Download,
   Keyboard,
   PenLine,
-  Plus,
   Search,
   Settings,
   FileText,
@@ -14,9 +14,16 @@ import {
   Type,
   Zap,
   Check,
+  CornerDownLeft,
+  LayoutList,
+  ArrowDownToLine,
+  Clock3,
+  Minimize2,
+  Wand2,
 } from 'lucide-react';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import type { ChatSettings, FontSize, ResponseSpeed } from './settings-panel';
+import { ProfileDropdown } from './profile-dropdown';
 
 interface ChatMsg {
   id: string;
@@ -163,18 +170,60 @@ function SettingsDropdown({
             </div>
           </div>
 
-          {/* Toggles */}
+          {/* Send key */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-1.5">
+              <CornerDownLeft className="h-3 w-3" style={{ color: '#3d4f6e' }} />
+              <span className="text-[11px] font-medium uppercase tracking-[0.07em]" style={{ color: '#3d4f6e' }}>
+                Send message
+              </span>
+            </div>
+            <div
+              className="flex rounded-lg overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+            >
+              {([
+                { value: 'enter', label: 'Enter' },
+                { value: 'cmd-enter', label: '⌘ Enter' },
+              ] as { value: import('./settings-panel').SendKey; label: string }[]).map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => update('sendKey', value)}
+                  className="flex-1 py-1.5 text-xs font-medium transition-all duration-150"
+                  style={
+                    settings.sendKey === value
+                      ? { background: persona.color, color: '#fff' }
+                      : { color: '#3d4f6e' }
+                  }
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Display toggles */}
           <div className="flex flex-col gap-0" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
+            <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.07em]" style={{ color: '#2d3d55' }}>
+              Display
+            </p>
             {([
-              { key: 'showTimestamps' as const, label: 'Show timestamps' },
-              { key: 'compactMode' as const, label: 'Compact density' },
-            ]).map(({ key, label }) => (
+              { key: 'showTimestamps' as const, label: 'Message timestamps', icon: Clock3 },
+              { key: 'compactMode' as const, label: 'Compact density', icon: Minimize2 },
+              { key: 'showReadTime' as const, label: 'Read time on long messages', icon: Wand2 },
+              { key: 'autoScroll' as const, label: 'Auto-scroll during streaming', icon: ArrowDownToLine },
+              { key: 'reduceMotion' as const, label: 'Reduce motion', icon: LayoutList },
+            ]).map(({ key, label, icon: Icon }) => (
               <div
                 key={key}
-                className="flex items-center justify-between py-2"
+                className="flex items-center justify-between py-2.5"
                 style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
               >
-                <span className="text-[13px]" style={{ color: '#5a6a85' }}>{label}</span>
+                <div className="flex items-center gap-2">
+                  <Icon className="h-3 w-3 flex-shrink-0" style={{ color: '#2d3d55' }} />
+                  <span className="text-[12px]" style={{ color: '#5a6a85' }}>{label}</span>
+                </div>
                 <button
                   type="button"
                   role="switch"
@@ -184,6 +233,7 @@ function SettingsDropdown({
                   style={{
                     background: (settings[key] as boolean) ? persona.color : 'rgba(255,255,255,0.08)',
                     border: `1px solid ${(settings[key] as boolean) ? persona.color : 'rgba(255,255,255,0.12)'}`,
+                    boxShadow: (settings[key] as boolean) ? `0 0 6px ${persona.color}40` : 'none',
                   }}
                 >
                   <span
@@ -327,7 +377,7 @@ function ExportDropdown({
 export function ChatHeader({
   persona,
   conversationTitle,
-  onNewChat,
+  onNewChat: _onNewChat,
   onTitleChange,
   onToggleSearch,
   settings,
@@ -335,13 +385,16 @@ export function ChatHeader({
   messages,
   onShowShortcuts,
 }: ChatHeaderProps) {
+  const { profile, currentTheme } = useUserProfile();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editValue, setEditValue] = useState(conversationTitle);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const settingsBtnRef = useRef<HTMLButtonElement>(null);
   const exportBtnRef = useRef<HTMLButtonElement>(null);
+  const profileBtnRef = useRef<HTMLButtonElement>(null);
 
   const commitEdit = useCallback(() => {
     const trimmed = editValue.trim();
@@ -470,28 +523,35 @@ export function ChatHeader({
           {/* Divider */}
           <div className="mx-1 h-4 w-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
 
+          {/* Profile avatar button */}
           <button
+            ref={profileBtnRef}
             type="button"
-            onClick={onNewChat}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all duration-150"
+            title={`${profile.name} — account & appearance`}
+            onClick={() => { setProfileOpen((o) => !o); setSettingsOpen(false); setExportOpen(false); }}
+            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-bold transition-all duration-150"
             style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.09)',
-              color: '#8b99b5',
+              background: profileOpen
+                ? `${currentTheme.accent}30`
+                : `${currentTheme.accent}18`,
+              border: profileOpen
+                ? `1.5px solid ${currentTheme.accent}60`
+                : `1.5px solid ${currentTheme.accent}35`,
+              color: currentTheme.accent,
+              letterSpacing: '-0.02em',
             }}
             onMouseEnter={(e) => {
               const el = e.currentTarget as HTMLButtonElement;
-              el.style.background = 'rgba(255,255,255,0.08)';
-              el.style.color = '#c8d3e8';
+              el.style.background = `${currentTheme.accent}2a`;
+              el.style.borderColor = `${currentTheme.accent}55`;
             }}
             onMouseLeave={(e) => {
               const el = e.currentTarget as HTMLButtonElement;
-              el.style.background = 'rgba(255,255,255,0.05)';
-              el.style.color = '#8b99b5';
+              el.style.background = profileOpen ? `${currentTheme.accent}30` : `${currentTheme.accent}18`;
+              el.style.borderColor = profileOpen ? `${currentTheme.accent}60` : `${currentTheme.accent}35`;
             }}
           >
-            <Plus className="h-3.5 w-3.5" />
-            New
+            {getInitials(profile.name)}
           </button>
         </div>
       </div>
@@ -512,6 +572,11 @@ export function ChatHeader({
         persona={persona}
         conversationTitle={conversationTitle}
         anchorRef={exportBtnRef}
+      />
+      <ProfileDropdown
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        anchorRef={profileBtnRef}
       />
     </>
   );

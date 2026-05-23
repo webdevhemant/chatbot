@@ -106,17 +106,17 @@ function ChatWindowInner({
     const el = scrollRef.current;
     if (!el) return;
 
-    if (isAtBottomRef.current) {
+    if (settings.autoScroll && isAtBottomRef.current) {
       // Cancel any pending RAF scroll
       if (rafScrollRef.current !== null) cancelAnimationFrame(rafScrollRef.current);
       rafScrollRef.current = requestAnimationFrame(() => {
         el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
         rafScrollRef.current = null;
       });
-    } else {
+    } else if (!isAtBottomRef.current) {
       setUnreadCount((n) => n + 1);
     }
-  }, [messages, showTyping]);
+  }, [messages, showTyping, settings.autoScroll]);
 
   const scrollToBottom = useCallback(() => {
     const el = scrollRef.current;
@@ -245,6 +245,7 @@ function ChatWindowInner({
           compact={settings.compactMode}
           responseSpeed={settings.responseSpeed}
           searchQuery={searchQuery}
+          showReadTime={settings.showReadTime}
         />,
       );
     } else {
@@ -269,6 +270,7 @@ function ChatWindowInner({
             fontSize={settings.fontSize}
             compact={settings.compactMode}
             searchQuery={searchQuery}
+            showReadTime={settings.showReadTime}
           />
         </div>,
       );
@@ -278,7 +280,7 @@ function ChatWindowInner({
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden" style={{ background: '#080c14' }}>
+    <div className="relative flex h-full flex-col overflow-hidden" style={{ background: 'var(--background)' }}>
       {/* Persona ambient glow */}
       <div
         className="pointer-events-none absolute inset-0 z-0 transition-all duration-1000"
@@ -373,6 +375,7 @@ function ChatWindowInner({
           onStop={handleStop}
           isStreaming={streamingId !== null || showTyping}
           fontSize={settings.fontSize}
+          sendKey={settings.sendKey}
         />
       </div>
 

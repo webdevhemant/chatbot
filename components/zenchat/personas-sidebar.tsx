@@ -2,6 +2,7 @@
 
 import { formatRelativeTime, getAllConversations } from '@/lib/mock/conversations';
 import { type Persona, personas } from '@/lib/mock/personas';
+import { getInitials, useUserProfile } from '@/lib/user-profile-context';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MessageSquare, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -31,6 +32,7 @@ export function PersonasSidebar({
   onNewChat,
   liveConversations = [],
 }: PersonasSidebarProps) {
+  const { profile, currentTheme } = useUserProfile();
   const [mockConvs] = useState(() => getAllConversations().slice(0, 8));
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -58,7 +60,7 @@ export function PersonasSidebar({
       <div
         className="flex h-full w-full flex-col overflow-hidden"
         style={{
-          background: '#07090f',
+          background: 'var(--sidebar, #07090f)',
           borderRight: '1px solid rgba(255,255,255,0.055)',
         }}
       >
@@ -109,7 +111,7 @@ export function PersonasSidebar({
         </div>
 
         {/* ── Scrollable body ───────────────────────────────── */}
-        <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-3 pb-4">
+        <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-3 pb-2">
 
           {/* Personas */}
           <div className="mb-5">
@@ -293,6 +295,43 @@ export function PersonasSidebar({
                 </AnimatePresence>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* ── User profile footer ───────────────────────────── */}
+        <div
+          className="flex-shrink-0 px-3 py-3"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+        >
+          <div
+            className="flex items-center gap-2.5 rounded-lg px-2.5 py-2"
+            style={{ background: 'rgba(255,255,255,0.025)' }}
+          >
+            <div
+              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+              style={{
+                background: `${currentTheme.accent}1a`,
+                border: `1.5px solid ${currentTheme.accent}35`,
+                color: currentTheme.accent,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {getInitials(profile.name)}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p
+                className="truncate text-[12px] font-medium leading-tight"
+                style={{ color: '#8b99b5' }}
+              >
+                {profile.name}
+              </p>
+              <p
+                className="truncate text-[10px] leading-tight"
+                style={{ color: '#2a3a52' }}
+              >
+                {profile.email}
+              </p>
+            </div>
           </div>
         </div>
       </div>
