@@ -28,7 +28,7 @@ const PLANS = [
     name: 'Free',
     badge: null,
     price: { monthly: 0, annual: 0 },
-    description: 'Explore HiveChat with all 5 personas.',
+    description: 'Explore HaxonChat with all 5 personas.',
     color: '#5a6a85',
     features: [
       '5 AI personas',
@@ -138,7 +138,7 @@ export default function UpgradePage() {
           onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = '#3d4f6e')}
         >
           <ArrowLeft className="h-4 w-4" />
-          <span className="text-[13px] font-medium">Back to HiveChat</span>
+          <span className="text-[13px] font-medium">Back to HaxonChat</span>
         </Link>
 
         <div className="flex items-center gap-2">
@@ -152,7 +152,7 @@ export default function UpgradePage() {
             <Sparkles className="h-3 w-3" style={{ color: currentTheme.accent }} />
           </div>
           <span className="text-[13px] font-semibold" style={{ color: '#c8d3e8', letterSpacing: '-0.01em' }}>
-            HiveChat
+            HaxonChat
           </span>
         </div>
       </div>

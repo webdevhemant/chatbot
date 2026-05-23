@@ -1,5 +1,5 @@
 'use server'
-// Server actions removed — HiveChat is frontend-only
+// Server actions removed — HaxonChat is frontend-only
 
 export async function saveChatModelAsCookie(_model: string) {
   return

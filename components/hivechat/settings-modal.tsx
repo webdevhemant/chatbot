@@ -798,7 +798,7 @@ function AboutSection({ accent }: { accent: string }) {
           </svg>
         </div>
         <div>
-          <p className="text-[16px] font-bold" style={{ color: '#dde4f0', letterSpacing: '-0.02em' }}>HiveChat</p>
+          <p className="text-[16px] font-bold" style={{ color: '#dde4f0', letterSpacing: '-0.02em' }}>HaxonChat</p>
           <p className="text-[12px]" style={{ color: '#2d3d55' }}>AI Personas · Frontend Edition</p>
         </div>
       </div>
@@ -826,7 +826,7 @@ function AboutSection({ accent }: { accent: string }) {
         style={{ background: `${accent}0a`, border: `1px solid ${accent}20` }}
       >
         <p className="text-[12px] leading-relaxed" style={{ color: '#4a5c78' }}>
-          HiveChat is a frontend-only AI chat interface with 5 distinct AI personas. No backend, no API keys required — all responses are intelligently mocked with realistic streaming simulation.
+          HaxonChat is a frontend-only AI chat interface with 5 distinct AI personas. No backend, no API keys required — all responses are intelligently mocked with realistic streaming simulation.
         </p>
       </div>
     </div>

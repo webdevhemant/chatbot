@@ -6,8 +6,8 @@ import { UserProfileProvider } from '@/lib/user-profile-context';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://hivechat.vercel.app'),
-  title: 'HiveChat — AI Personas',
+  metadataBase: new URL('https://haxonchat.vercel.app'),
+  title: 'HaxonChat — AI Personas',
   description: 'A beautiful AI chat experience with multiple personas. Mindful, wise, energetic, mysterious, and warm.',
   icons: {
     icon: '/icon.svg',

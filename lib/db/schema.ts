@@ -1,4 +1,4 @@
-// Stub types for frontend-only HiveChat — no database
+// Stub types for frontend-only HaxonChat — no database
 
 export type Chat = {
   id: string;

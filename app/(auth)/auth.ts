@@ -1,4 +1,4 @@
-// Stub auth — HiveChat is frontend-only, no real authentication
+// Stub auth — HaxonChat is frontend-only, no real authentication
 
 export async function signOut(_options?: { redirectTo?: string }) {
   // No-op in frontend-only mode
