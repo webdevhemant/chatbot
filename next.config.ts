@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -11,9 +10,6 @@ const nextConfig: NextConfig = {
         hostname: "avatar.vercel.sh",
       },
     ],
-  },
-  turbopack: {
-    root: path.resolve(__dirname),
   },
 };
 
