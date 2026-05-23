@@ -68,15 +68,30 @@ export function PersonasSidebar({
         <div className="flex-shrink-0 px-4 pt-5 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              {/* Wordmark */}
+              {/* Wordmark — hexagon logo */}
               <div
-                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-sm"
+                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, #6c8eff 0%, #a78bfa 100%)',
-                  boxShadow: '0 2px 8px rgba(108,142,255,0.4)',
+                  background: 'linear-gradient(135deg, #0f1624 0%, #07090f 100%)',
+                  boxShadow: `0 2px 8px ${currentTheme.accent}40`,
+                  border: `1px solid ${currentTheme.accent}25`,
                 }}
               >
-                <span aria-hidden style={{ fontSize: '14px', lineHeight: 1 }}>◈</span>
+                <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden>
+                  <defs>
+                    <linearGradient id="sb-hex" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor={currentTheme.accent} stopOpacity="1"/>
+                      <stop offset="100%" stopColor={currentTheme.accent} stopOpacity="0.6"/>
+                    </linearGradient>
+                    <linearGradient id="sb-inner" x1="8" y1="8" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#1e3a6e"/>
+                      <stop offset="100%" stopColor="#07090f"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M16 4 L26.4 10 L26.4 22 L16 28 L5.6 22 L5.6 10 Z" fill="url(#sb-hex)"/>
+                  <path d="M16 9 L22.2 12.5 L22.2 19.5 L16 23 L9.8 19.5 L9.8 12.5 Z" fill="url(#sb-inner)"/>
+                  <circle cx="16" cy="16" r="2" fill="url(#sb-hex)"/>
+                </svg>
               </div>
               <span
                 className="text-[13px] font-semibold tracking-tight"

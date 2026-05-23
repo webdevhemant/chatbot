@@ -112,7 +112,7 @@ chatbot/
 │   └── layout.tsx            # Root layout (fonts, metadata, providers)
 │
 ├── components/
-│   └── zenchat/
+│   └── hivechat/
 │       ├── chat-window.tsx       # Core chat logic, scroll tracking, keyboard shortcuts
 │       ├── chat-header.tsx       # Persona info, title edit, settings/export/search buttons
 │       ├── chat-input.tsx        # Textarea, char counter, send/stop button

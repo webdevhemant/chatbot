@@ -1,7 +1,7 @@
 'use client';
 
-import { PersonasSidebar } from '@/components/zenchat/personas-sidebar';
-import { ChatWindow } from '@/components/zenchat/chat-window';
+import { PersonasSidebar } from '@/components/hivechat/personas-sidebar';
+import { ChatWindow } from '@/components/hivechat/chat-window';
 import { mockConversations } from '@/lib/mock/conversations';
 import { type Persona, getPersonaById, personas } from '@/lib/mock/personas';
 import { AnimatePresence, motion } from 'framer-motion';

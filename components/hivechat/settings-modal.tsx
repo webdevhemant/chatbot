@@ -774,13 +774,28 @@ function AboutSection({ accent }: { accent: string }) {
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div
-          className="flex h-12 w-12 items-center justify-center rounded-2xl text-xl"
+          className="flex h-12 w-12 items-center justify-center rounded-2xl overflow-hidden"
           style={{
-            background: `linear-gradient(135deg, ${accent}30, ${accent}15)`,
+            background: 'linear-gradient(135deg, #0f1624 0%, #07090f 100%)',
             border: `1.5px solid ${accent}35`,
+            boxShadow: `0 4px 16px ${accent}30`,
           }}
         >
-          <Sparkles className="h-6 w-6" style={{ color: accent }} />
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30" aria-hidden>
+            <defs>
+              <linearGradient id="about-hex" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor={accent} stopOpacity="1"/>
+                <stop offset="100%" stopColor={accent} stopOpacity="0.55"/>
+              </linearGradient>
+              <linearGradient id="about-inner" x1="8" y1="8" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#1e3a6e"/>
+                <stop offset="100%" stopColor="#07090f"/>
+              </linearGradient>
+            </defs>
+            <path d="M16 4 L26.4 10 L26.4 22 L16 28 L5.6 22 L5.6 10 Z" fill="url(#about-hex)"/>
+            <path d="M16 9 L22.2 12.5 L22.2 19.5 L16 23 L9.8 19.5 L9.8 12.5 Z" fill="url(#about-inner)"/>
+            <circle cx="16" cy="16" r="2" fill="url(#about-hex)"/>
+          </svg>
         </div>
         <div>
           <p className="text-[16px] font-bold" style={{ color: '#dde4f0', letterSpacing: '-0.02em' }}>HiveChat</p>
@@ -904,13 +919,27 @@ export function SettingsModal({
                 <div className="flex-shrink-0 px-4 pt-5 pb-4">
                   <div className="flex items-center gap-2">
                     <div
-                      className="flex h-6 w-6 items-center justify-center rounded-lg text-xs"
+                      className="flex h-6 w-6 items-center justify-center rounded-lg overflow-hidden"
                       style={{
-                        background: `linear-gradient(135deg, ${accent}40, ${accent}20)`,
+                        background: 'linear-gradient(135deg, #0f1624 0%, #07090f 100%)',
                         border: `1px solid ${accent}30`,
                       }}
                     >
-                      <Sparkles className="h-3 w-3" style={{ color: accent }} />
+                      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" aria-hidden>
+                        <defs>
+                          <linearGradient id="nav-hex" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stopColor={accent} stopOpacity="1"/>
+                            <stop offset="100%" stopColor={accent} stopOpacity="0.6"/>
+                          </linearGradient>
+                          <linearGradient id="nav-inner" x1="8" y1="8" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stopColor="#1e3a6e"/>
+                            <stop offset="100%" stopColor="#07090f"/>
+                          </linearGradient>
+                        </defs>
+                        <path d="M16 4 L26.4 10 L26.4 22 L16 28 L5.6 22 L5.6 10 Z" fill="url(#nav-hex)"/>
+                        <path d="M16 9 L22.2 12.5 L22.2 19.5 L16 23 L9.8 19.5 L9.8 12.5 Z" fill="url(#nav-inner)"/>
+                        <circle cx="16" cy="16" r="2" fill="url(#nav-hex)"/>
+                      </svg>
                     </div>
                     <span className="text-[13px] font-semibold" style={{ color: '#c8d3e8', letterSpacing: '-0.01em' }}>
                       Settings
