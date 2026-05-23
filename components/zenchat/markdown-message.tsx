@@ -116,7 +116,7 @@ function applyInlineMarkdown(text: string, searchQuery: string, cursor?: ReactNo
   if (remaining) parts.push(highlightSegment(remaining, searchQuery, `tail-${lastIndex}`));
 
   // Append cursor at the very end of this inline run
-  if (cursor) parts.push(cursor);
+  if (cursor) parts.push(<span key="__cursor__" style={{ display: 'inline' }}>{cursor}</span>);
 
   return parts;
 }

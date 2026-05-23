@@ -4,7 +4,8 @@ import { useStreamingText } from '@/lib/mock/streaming';
 import type { Persona } from '@/lib/mock/personas';
 import { MessageBubble } from './message-bubble';
 import type { ResponseSpeed } from './settings-panel';
-import { useMemo, useRef } from 'react';
+import { useRef } from 'react';
+import { TypingIndicator } from './typing-indicator';
 
 interface StreamingMessageProps {
   id: string;
@@ -35,14 +36,21 @@ export function StreamingMessage({
   responseSpeed = 'normal',
   searchQuery,
 }: StreamingMessageProps) {
-  // Stable timestamp so the bubble doesn't create a new Date() on every render
+  // Stable timestamp — don't create new Date() on every render
   const timestampRef = useRef(new Date());
 
-  const { displayText, isStreaming } = useStreamingText(
+  const { displayText, isStreaming, charIndex } = useStreamingText(
     fullText,
     onComplete,
     speedMultiplier[responseSpeed],
   );
+
+  // While no characters have been emitted yet, show the typing indicator
+  // so there's no empty-bubble flash between the indicator disappearing and
+  // the first character arriving.
+  if (charIndex === 0) {
+    return <TypingIndicator persona={persona} />;
+  }
 
   return (
     <MessageBubble

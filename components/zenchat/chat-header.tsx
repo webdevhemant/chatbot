@@ -2,11 +2,21 @@
 
 import type { Persona } from '@/lib/mock/personas';
 import { motion } from 'framer-motion';
-import { Download, Keyboard, PenLine, Plus, Search, Settings } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import type { ChatSettings } from './settings-panel';
-import { SettingsPanel } from './settings-panel';
-import { ExportMenu } from './export-menu';
+import {
+  Download,
+  Keyboard,
+  PenLine,
+  Plus,
+  Search,
+  Settings,
+  FileText,
+  X,
+  Type,
+  Zap,
+  Check,
+} from 'lucide-react';
+import { useCallback, useRef, useState, useEffect } from 'react';
+import type { ChatSettings, FontSize, ResponseSpeed } from './settings-panel';
 
 interface ChatMsg {
   id: string;
@@ -26,6 +36,294 @@ interface ChatHeaderProps {
   onShowShortcuts?: () => void;
 }
 
+// ── Inline Settings panel (fixed portal) ─────────────────────────────────────
+function SettingsDropdown({
+  isOpen,
+  onClose,
+  settings,
+  onSettingsChange,
+  persona,
+  anchorRef,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  settings: ChatSettings;
+  onSettingsChange: (s: ChatSettings) => void;
+  persona: Persona;
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
+}) {
+  const [pos, setPos] = useState({ top: 0, right: 0 });
+
+  useEffect(() => {
+    if (isOpen && anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+    }
+  }, [isOpen, anchorRef]);
+
+  const update = <K extends keyof ChatSettings>(key: K, val: ChatSettings[K]) =>
+    onSettingsChange({ ...settings, [key]: val });
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <div className="fixed inset-0 z-[60]" onClick={onClose} />
+      <div
+        className="fixed z-[61] w-72 rounded-xl overflow-hidden"
+        style={{
+          top: pos.top,
+          right: pos.right,
+          background: '#0d1220',
+          border: '1px solid rgba(255,255,255,0.09)',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.03)',
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between px-4 py-3"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
+        >
+          <div className="flex items-center gap-2">
+            <Settings className="h-3.5 w-3.5" style={{ color: '#3d4f6e' }} />
+            <span className="text-[13px] font-semibold" style={{ color: '#c8d3e8' }}>
+              Preferences
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-6 w-6 items-center justify-center rounded-md transition-colors duration-150"
+            style={{ color: '#3d4f6e' }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = '#8b99b5')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = '#3d4f6e')}
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        <div className="p-4 flex flex-col gap-5">
+          {/* Font size */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-1.5">
+              <Type className="h-3 w-3" style={{ color: '#3d4f6e' }} />
+              <span className="text-[11px] font-medium uppercase tracking-[0.07em]" style={{ color: '#3d4f6e' }}>
+                Text size
+              </span>
+            </div>
+            <div
+              className="flex rounded-lg overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+            >
+              {(['sm', 'md', 'lg'] as FontSize[]).map((v, i) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => update('fontSize', v)}
+                  className="flex-1 py-1.5 text-xs font-medium transition-all duration-150"
+                  style={
+                    settings.fontSize === v
+                      ? { background: persona.color, color: '#fff' }
+                      : { color: '#3d4f6e' }
+                  }
+                >
+                  {['Small', 'Medium', 'Large'][i]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Streaming speed */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-1.5">
+              <Zap className="h-3 w-3" style={{ color: '#3d4f6e' }} />
+              <span className="text-[11px] font-medium uppercase tracking-[0.07em]" style={{ color: '#3d4f6e' }}>
+                Response speed
+              </span>
+            </div>
+            <div
+              className="flex rounded-lg overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+            >
+              {(['fast', 'normal', 'slow'] as ResponseSpeed[]).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => update('responseSpeed', v)}
+                  className="flex-1 py-1.5 text-xs font-medium capitalize transition-all duration-150"
+                  style={
+                    settings.responseSpeed === v
+                      ? { background: persona.color, color: '#fff' }
+                      : { color: '#3d4f6e' }
+                  }
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Toggles */}
+          <div className="flex flex-col gap-0" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
+            {([
+              { key: 'showTimestamps' as const, label: 'Show timestamps' },
+              { key: 'compactMode' as const, label: 'Compact density' },
+            ]).map(({ key, label }) => (
+              <div
+                key={key}
+                className="flex items-center justify-between py-2"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+              >
+                <span className="text-[13px]" style={{ color: '#5a6a85' }}>{label}</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={settings[key] as boolean}
+                  onClick={() => update(key, !(settings[key] as boolean))}
+                  className="relative h-5 w-9 flex-shrink-0 rounded-full transition-all duration-200"
+                  style={{
+                    background: (settings[key] as boolean) ? persona.color : 'rgba(255,255,255,0.08)',
+                    border: `1px solid ${(settings[key] as boolean) ? persona.color : 'rgba(255,255,255,0.12)'}`,
+                  }}
+                >
+                  <span
+                    className="absolute top-0.5 left-0.5 h-3.5 w-3.5 rounded-full bg-white transition-transform duration-200"
+                    style={{ transform: (settings[key] as boolean) ? 'translateX(16px)' : 'translateX(0)' }}
+                  />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Export dropdown (fixed portal) ───────────────────────────────────────────
+function ExportDropdown({
+  isOpen,
+  onClose,
+  messages,
+  persona,
+  conversationTitle,
+  anchorRef,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  messages: ChatMsg[];
+  persona: Persona;
+  conversationTitle: string;
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
+}) {
+  const [pos, setPos] = useState({ top: 0, right: 0 });
+  const [exported, setExported] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen && anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+    }
+  }, [isOpen, anchorRef]);
+
+  const doExport = (type: 'txt' | 'json') => {
+    let blob: Blob;
+    let filename: string;
+    const slug = conversationTitle.replace(/\s+/g, '-').toLowerCase();
+
+    if (type === 'txt') {
+      const lines = [
+        `# ${conversationTitle}`,
+        `Persona: ${persona.name} — ${persona.tagline}`,
+        `Exported: ${new Date().toLocaleString()}`,
+        '', '---', '',
+        ...messages.map((m) => `**${m.role === 'user' ? 'You' : persona.name}**\n${m.content}\n`),
+      ];
+      blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+      filename = `${slug}.txt`;
+    } else {
+      const data = {
+        title: conversationTitle,
+        persona: { id: persona.id, name: persona.name },
+        exportedAt: new Date().toISOString(),
+        messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      };
+      blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      filename = `${slug}.json`;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    setExported(type);
+    setTimeout(() => { setExported(null); onClose(); }, 1200);
+  };
+
+  if (!isOpen) return null;
+
+  const opts = [
+    { type: 'txt' as const, icon: FileText, label: 'Plain text', desc: '.txt — readable transcript' },
+    { type: 'json' as const, icon: Download, label: 'JSON data', desc: '.json — structured format' },
+  ];
+
+  return (
+    <>
+      <div className="fixed inset-0 z-[60]" onClick={onClose} />
+      <div
+        className="fixed z-[61] w-52 rounded-xl overflow-hidden"
+        style={{
+          top: pos.top,
+          right: pos.right,
+          background: '#0d1220',
+          border: '1px solid rgba(255,255,255,0.09)',
+          boxShadow: '0 20px 56px rgba(0,0,0,0.65)',
+        }}
+      >
+        <div
+          className="px-3 py-2.5"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
+        >
+          <span className="text-[11px] font-semibold uppercase tracking-[0.07em]" style={{ color: '#3d4f6e' }}>
+            Export chat
+          </span>
+        </div>
+        {messages.length === 0 ? (
+          <p className="px-4 py-4 text-center text-[12px]" style={{ color: '#2d3d55' }}>
+            No messages to export yet
+          </p>
+        ) : (
+          <div className="p-1.5 flex flex-col gap-0.5">
+            {opts.map(({ type, icon: Icon, label, desc }) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => doExport(type)}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-150"
+                style={{ color: exported === type ? persona.color : '#c8d3e8' }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')}
+              >
+                {exported === type
+                  ? <Check className="h-4 w-4 flex-shrink-0" style={{ color: persona.color }} />
+                  : <Icon className="h-4 w-4 flex-shrink-0" style={{ color: '#3d4f6e' }} />
+                }
+                <div>
+                  <p className="text-[12px] font-medium">{label}</p>
+                  <p className="text-[10px]" style={{ color: '#2d3d55' }}>{desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ── Main header ───────────────────────────────────────────────────────────────
 export function ChatHeader({
   persona,
   conversationTitle,
@@ -42,202 +340,216 @@ export function ChatHeader({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
 
+  const settingsBtnRef = useRef<HTMLButtonElement>(null);
+  const exportBtnRef = useRef<HTMLButtonElement>(null);
+
   const commitEdit = useCallback(() => {
     const trimmed = editValue.trim();
-    if (trimmed) {
-      onTitleChange(trimmed);
-    } else {
-      setEditValue(conversationTitle);
-    }
+    if (trimmed) onTitleChange(trimmed);
+    else setEditValue(conversationTitle);
     setIsEditingTitle(false);
   }, [editValue, conversationTitle, onTitleChange]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter') commitEdit();
-      if (e.key === 'Escape') {
-        setEditValue(conversationTitle);
-        setIsEditingTitle(false);
-      }
+      if (e.key === 'Escape') { setEditValue(conversationTitle); setIsEditingTitle(false); }
     },
     [commitEdit, conversationTitle],
   );
 
   return (
-    <div
-      className="relative flex flex-shrink-0 items-center justify-between px-5 py-3.5"
-      style={{
-        borderBottom: '1px solid rgba(255,255,255,0.05)',
-        background: 'rgba(8, 12, 20, 0.8)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-      }}
-    >
-      {/* Left: persona + title */}
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+    <>
+      <div
+        className="relative z-10 flex flex-shrink-0 items-center gap-3 px-4 py-3"
+        style={{
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(7,9,15,0.85)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
+      >
+        {/* Persona chip */}
         <motion.div
           key={persona.id}
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-lg"
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-base"
           style={{
-            background: `${persona.color}18`,
-            border: `1px solid ${persona.color}30`,
-            boxShadow: `0 0 16px ${persona.color}20`,
+            background: `${persona.color}14`,
+            border: `1px solid ${persona.color}28`,
           }}
         >
           {persona.avatar}
         </motion.div>
 
+        {/* Title block */}
         <div className="min-w-0 flex-1">
           <motion.div
             key={persona.id}
-            initial={{ opacity: 0, x: -8 }}
+            initial={{ opacity: 0, x: -6 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.25 }}
-            className="flex items-center gap-1.5"
+            transition={{ duration: 0.2 }}
+            className="flex items-baseline gap-1.5"
           >
-            <span className="text-sm font-semibold" style={{ color: persona.color }}>
+            <span className="text-[13px] font-semibold" style={{ color: persona.color }}>
               {persona.name}
             </span>
-            <span className="text-[#2d3d55] text-xs">·</span>
-            <span className="text-xs text-[#3d4f6e] truncate">{persona.tagline}</span>
+            <span className="text-[11px]" style={{ color: '#1e2d42' }}>·</span>
+            <span className="truncate text-[11px]" style={{ color: '#2d3d55' }}>{persona.tagline}</span>
           </motion.div>
 
-          <div className="flex items-center gap-1 mt-0.5">
-            {isEditingTitle ? (
-              <input
-                autoFocus
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onBlur={commitEdit}
-                onKeyDown={handleKeyDown}
-                className="min-w-0 flex-1 bg-transparent text-xs text-[#c8d3e8] outline-none"
-                style={{ borderBottom: `1px solid ${persona.color}50`, paddingBottom: '1px' }}
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => { setEditValue(conversationTitle); setIsEditingTitle(true); }}
-                className="group flex items-center gap-1 text-left"
+          {/* Editable conversation title */}
+          {isEditingTitle ? (
+            <input
+              autoFocus
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={commitEdit}
+              onKeyDown={handleKeyDown}
+              className="mt-0.5 w-full max-w-xs bg-transparent text-[12px] outline-none"
+              style={{
+                color: '#c8d3e8',
+                borderBottom: `1px solid ${persona.color}50`,
+                paddingBottom: '1px',
+              }}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => { setEditValue(conversationTitle); setIsEditingTitle(true); }}
+              className="group mt-0.5 flex items-center gap-1 text-left"
+            >
+              <span
+                className="truncate max-w-[220px] text-[12px] transition-colors duration-100"
+                style={{ color: '#2d3d55' }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLSpanElement).style.color = '#4a5c78')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLSpanElement).style.color = '#2d3d55')}
               >
-                <span className="truncate text-xs text-[#2d3d55] group-hover:text-[#4a5c78] transition-colors duration-150">
-                  {conversationTitle}
-                </span>
-                <PenLine className="h-2.5 w-2.5 text-[#2d3d55] opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
-              </button>
-            )}
-          </div>
+                {conversationTitle}
+              </span>
+              <PenLine
+                className="h-2.5 w-2.5 opacity-0 transition-opacity duration-100 group-hover:opacity-100"
+                style={{ color: '#2d3d55' }}
+              />
+            </button>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-shrink-0 items-center gap-0.5">
+          <HdrBtn title="Search  ⌘F" onClick={onToggleSearch}>
+            <Search className="h-3.5 w-3.5" />
+          </HdrBtn>
+
+          {onShowShortcuts && (
+            <HdrBtn title="Shortcuts  ⌘/" onClick={onShowShortcuts}>
+              <Keyboard className="h-3.5 w-3.5" />
+            </HdrBtn>
+          )}
+
+          <HdrBtn
+            title="Export"
+            onClick={() => { setExportOpen((o) => !o); setSettingsOpen(false); }}
+            active={exportOpen}
+            ref={exportBtnRef}
+          >
+            <Download className="h-3.5 w-3.5" />
+          </HdrBtn>
+
+          <HdrBtn
+            title="Settings"
+            onClick={() => { setSettingsOpen((o) => !o); setExportOpen(false); }}
+            active={settingsOpen}
+            ref={settingsBtnRef}
+          >
+            <Settings className="h-3.5 w-3.5" />
+          </HdrBtn>
+
+          {/* Divider */}
+          <div className="mx-1 h-4 w-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+
+          <button
+            type="button"
+            onClick={onNewChat}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all duration-150"
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.09)',
+              color: '#8b99b5',
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLButtonElement;
+              el.style.background = 'rgba(255,255,255,0.08)';
+              el.style.color = '#c8d3e8';
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLButtonElement;
+              el.style.background = 'rgba(255,255,255,0.05)';
+              el.style.color = '#8b99b5';
+            }}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            New
+          </button>
         </div>
       </div>
 
-      {/* Right: action buttons */}
-      <div className="relative flex items-center gap-1 flex-shrink-0">
-        <IconBtn title="Search (⌘F)" onClick={onToggleSearch} persona={persona}>
-          <Search className="h-3.5 w-3.5" />
-        </IconBtn>
-
-        {onShowShortcuts && (
-          <IconBtn title="Keyboard shortcuts (⌘/)" onClick={onShowShortcuts} persona={persona}>
-            <Keyboard className="h-3.5 w-3.5" />
-          </IconBtn>
-        )}
-
-        <IconBtn
-          title="Export"
-          onClick={() => { setExportOpen((o) => !o); setSettingsOpen(false); }}
-          persona={persona}
-          active={exportOpen}
-        >
-          <Download className="h-3.5 w-3.5" />
-        </IconBtn>
-
-        <IconBtn
-          title="Settings"
-          onClick={() => { setSettingsOpen((o) => !o); setExportOpen(false); }}
-          persona={persona}
-          active={settingsOpen}
-        >
-          <Settings className="h-3.5 w-3.5" />
-        </IconBtn>
-
-        <button
-          type="button"
-          onClick={onNewChat}
-          className="flex flex-shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition-all duration-150 ml-1"
-          style={{
-            background: `${persona.color}12`,
-            border: `1px solid ${persona.color}25`,
-            color: persona.color,
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = `${persona.color}20`;
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 12px ${persona.color}20`;
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = `${persona.color}12`;
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
-          }}
-        >
-          <Plus className="h-3.5 w-3.5" />
-          New
-        </button>
-
-        {/* Panels */}
-        <SettingsPanel
-          isOpen={settingsOpen}
-          onClose={() => setSettingsOpen(false)}
-          settings={settings}
-          onSettingsChange={onSettingsChange}
-          persona={persona}
-        />
-        <ExportMenu
-          isOpen={exportOpen}
-          onClose={() => setExportOpen(false)}
-          messages={messages}
-          persona={persona}
-          conversationTitle={conversationTitle}
-        />
-      </div>
-    </div>
+      {/* Fixed-position panels (won't clip under chat area) */}
+      <SettingsDropdown
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        settings={settings}
+        onSettingsChange={onSettingsChange}
+        persona={persona}
+        anchorRef={settingsBtnRef}
+      />
+      <ExportDropdown
+        isOpen={exportOpen}
+        onClose={() => setExportOpen(false)}
+        messages={messages}
+        persona={persona}
+        conversationTitle={conversationTitle}
+        anchorRef={exportBtnRef}
+      />
+    </>
   );
 }
 
-function IconBtn({
+// ── Small icon button ─────────────────────────────────────────────────────────
+const HdrBtn = ({
   children,
   title,
   onClick,
-  persona,
   active = false,
+  ref,
 }: {
   children: React.ReactNode;
   title: string;
   onClick: () => void;
-  persona: Persona;
   active?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      title={title}
-      onClick={onClick}
-      className="flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-150"
-      style={{
-        color: active ? persona.color : '#3d4f6e',
-        background: active ? `${persona.color}15` : 'transparent',
-        border: active ? `1px solid ${persona.color}30` : '1px solid transparent',
-      }}
-      onMouseEnter={(e) => {
-        if (!active) (e.currentTarget as HTMLButtonElement).style.color = '#6a7d95';
-        (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)';
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.color = active ? persona.color : '#3d4f6e';
-        (e.currentTarget as HTMLButtonElement).style.background = active ? `${persona.color}15` : 'transparent';
-      }}
-    >
-      {children}
-    </button>
-  );
-}
+  ref?: React.Ref<HTMLButtonElement>;
+}) => (
+  <button
+    ref={ref}
+    type="button"
+    title={title}
+    onClick={onClick}
+    className="flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-150"
+    style={{
+      color: active ? '#c8d3e8' : '#3d4f6e',
+      background: active ? 'rgba(255,255,255,0.08)' : 'transparent',
+    }}
+    onMouseEnter={(e) => {
+      (e.currentTarget as HTMLButtonElement).style.color = '#8b99b5';
+      (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)';
+    }}
+    onMouseLeave={(e) => {
+      (e.currentTarget as HTMLButtonElement).style.color = active ? '#c8d3e8' : '#3d4f6e';
+      (e.currentTarget as HTMLButtonElement).style.background = active ? 'rgba(255,255,255,0.08)' : 'transparent';
+    }}
+  >
+    {children}
+  </button>
+);
